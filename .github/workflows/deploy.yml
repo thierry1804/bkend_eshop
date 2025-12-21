@@ -16,6 +16,14 @@ jobs:
       - name: Checkout du code
         uses: actions/checkout@v4
 
+      - name: Configurer Git pour le workspace
+        run: git config --global --add safe.directory /github/workspace
+
+      - name: Créer le fichier .env pour le build
+        run: |
+          echo "APP_ENV=prod" > .env
+          echo "APP_DEBUG=0" >> .env
+
       - name: Configurer PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -30,11 +38,6 @@ jobs:
 
       - name: Installer les dépendances
         run: composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
-
-      - name: Configurer l'environnement de production
-        run: |
-          echo "APP_ENV=prod" >> .env
-          echo "APP_DEBUG=0" >> .env
 
       - name: Vérifier la syntaxe PHP
         run: find . -name "*.php" -not -path "./vendor/*" -exec php -l {} \;

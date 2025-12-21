@@ -25,6 +25,14 @@ jobs:
       - name: Checkout du code
         uses: actions/checkout@v4
 
+      - name: Configurer Git pour le workspace
+        run: git config --global --add safe.directory /github/workspace
+
+      - name: Créer le fichier .env pour CI
+        run: |
+          echo "APP_ENV=test" > .env
+          echo "APP_SECRET=test-secret-key-for-ci" >> .env
+
       - name: Configurer PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -45,11 +53,12 @@ jobs:
 
       - name: Configurer les variables d'environnement de test
         run: |
-          echo "APP_ENV=test" >> .env.test
-          echo "APP_SECRET=test-secret-key-for-ci" >> .env.test
-          echo "DATABASE_URL=mysql://root:root@127.0.0.1:3306/symfony_test?serverVersion=8.0.32&charset=utf8mb4" >> .env.test
-          echo "MESSENGER_TRANSPORT_DSN=doctrine://default" >> .env.test
-          echo "MAILER_DSN=null://null" >> .env.test
+          # Mettre à jour le fichier .env pour les tests
+          echo "APP_ENV=test" > .env
+          echo "APP_SECRET=test-secret-key-for-ci" >> .env
+          echo "DATABASE_URL=mysql://root:root@127.0.0.1:3306/symfony_test?serverVersion=8.0.32&charset=utf8mb4" >> .env
+          echo "MESSENGER_TRANSPORT_DSN=doctrine://default" >> .env
+          echo "MAILER_DSN=null://null" >> .env
 
       - name: Créer la base de données de test
         run: |
@@ -77,6 +86,14 @@ jobs:
     steps:
       - name: Checkout du code
         uses: actions/checkout@v4
+
+      - name: Configurer Git pour le workspace
+        run: git config --global --add safe.directory /github/workspace
+
+      - name: Créer le fichier .env pour CI
+        run: |
+          echo "APP_ENV=test" > .env
+          echo "APP_SECRET=test-secret-key-for-ci" >> .env
 
       - name: Configurer PHP
         uses: shivammathur/setup-php@v2

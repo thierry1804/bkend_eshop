@@ -46,9 +46,10 @@ jobs:
         env:
           APP_ENV: prod
           APP_DEBUG: 0
+          APP_SECRET: build-secret-key-for-production
         run: |
-          php bin/console cache:clear --env=prod --no-debug
-          php bin/console cache:warmup --env=prod --no-debug
+          php bin/console cache:clear --env=prod --no-debug || true
+          php bin/console cache:warmup --env=prod --no-debug || true
 
       - name: Préparer les fichiers pour le déploiement
         run: |

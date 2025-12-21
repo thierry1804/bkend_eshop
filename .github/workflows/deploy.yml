@@ -37,11 +37,6 @@ jobs:
           extensions: ctype, iconv, pdo, pdo_mysql
           coverage: none
 
-      - name: Installer Composer
-        uses: php-actions/composer@v1
-        with:
-          php_version: '8.1'
-
       - name: Installer les dépendances
         env:
           COMPOSER_HOME: ${{ runner.temp }}/composer

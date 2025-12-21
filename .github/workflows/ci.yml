@@ -25,8 +25,19 @@ jobs:
       - name: Checkout du code
         uses: actions/checkout@v4
 
-      - name: Allow git to use the workspace directory
-        run: git config --global --add safe.directory /github/workspace
+      - name: Fix permissions for workspace
+        run: |
+          # Allow git directory ownership
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          
+          # Fix ownership and permissions for workspace
+          sudo chown -R "$(id -u):$(id -g)" "$GITHUB_WORKSPACE"
+          sudo chmod -R u+rw "$GITHUB_WORKSPACE"
+          
+          # Ensure vendor directory is writable
+          sudo mkdir -p "$GITHUB_WORKSPACE/vendor"
+          sudo chown -R "$(id -u):$(id -g)" "$GITHUB_WORKSPACE/vendor"
+          sudo chmod -R u+rw "$GITHUB_WORKSPACE/vendor"
 
       - name: Créer le fichier .env avec toutes les variables nécessaires
         run: |
@@ -49,7 +60,10 @@ jobs:
           php_version: '8.1'
 
       - name: Installer les dépendances
-        run: composer install --prefer-dist --no-interaction
+        env:
+          COMPOSER_HOME: ${{ runner.temp }}/composer
+          COMPOSER_CACHE_DIR: ${{ runner.temp }}/composer-cache
+        run: composer install --prefer-dist --no-interaction --no-progress
 
       - name: Vérifier la syntaxe PHP
         run: find . -name "*.php" -not -path "./vendor/*" -exec php -l {} \;
@@ -90,8 +104,19 @@ jobs:
       - name: Checkout du code
         uses: actions/checkout@v4
 
-      - name: Allow git to use the workspace directory
-        run: git config --global --add safe.directory /github/workspace
+      - name: Fix permissions for workspace
+        run: |
+          # Allow git directory ownership
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          
+          # Fix ownership and permissions for workspace
+          sudo chown -R "$(id -u):$(id -g)" "$GITHUB_WORKSPACE"
+          sudo chmod -R u+rw "$GITHUB_WORKSPACE"
+          
+          # Ensure vendor directory is writable
+          sudo mkdir -p "$GITHUB_WORKSPACE/vendor"
+          sudo chown -R "$(id -u):$(id -g)" "$GITHUB_WORKSPACE/vendor"
+          sudo chmod -R u+rw "$GITHUB_WORKSPACE/vendor"
 
       - name: Créer le fichier .env pour CI
         run: |
@@ -110,7 +135,10 @@ jobs:
           php_version: '8.1'
 
       - name: Installer les dépendances
-        run: composer install --prefer-dist --no-interaction
+        env:
+          COMPOSER_HOME: ${{ runner.temp }}/composer
+          COMPOSER_CACHE_DIR: ${{ runner.temp }}/composer-cache
+        run: composer install --prefer-dist --no-interaction --no-progress
 
       - name: Vérifier la syntaxe PHP
         run: find . -name "*.php" -not -path "./vendor/*" -exec php -l {} \;

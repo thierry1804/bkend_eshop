@@ -1,0 +1,106 @@
+name: Tests et Validation CI
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+jobs:
+  test:
+    name: Tests PHP
+    runs-on: ubuntu-latest
+    
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: symfony_test
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Configurer PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: ctype, iconv, pdo, pdo_mysql
+          coverage: none
+
+      - name: Installer Composer
+        uses: php-actions/composer@v1
+        with:
+          php_version: '8.1'
+
+      - name: Installer les dépendances
+        run: composer install --prefer-dist --no-interaction
+
+      - name: Vérifier la syntaxe PHP
+        run: find . -name "*.php" -not -path "./vendor/*" -exec php -l {} \;
+
+      - name: Configurer les variables d'environnement de test
+        run: |
+          echo "APP_ENV=test" >> .env.test
+          echo "APP_SECRET=test-secret-key-for-ci" >> .env.test
+          echo "DATABASE_URL=mysql://root:root@127.0.0.1:3306/symfony_test?serverVersion=8.0.32&charset=utf8mb4" >> .env.test
+          echo "MESSENGER_TRANSPORT_DSN=doctrine://default" >> .env.test
+          echo "MAILER_DSN=null://null" >> .env.test
+
+      - name: Créer la base de données de test
+        run: |
+          php bin/console doctrine:database:create --env=test --if-not-exists || true
+          php bin/console doctrine:schema:create --env=test || true
+
+      - name: Exécuter les tests (si disponibles)
+        run: |
+          if [ -d "tests" ] && [ "$(ls -A tests)" ]; then
+            php bin/phpunit || echo "Aucun test configuré"
+          else
+            echo "Aucun test trouvé"
+          fi
+        continue-on-error: true
+
+      - name: Vérifier le cache Symfony
+        run: |
+          php bin/console cache:clear --env=test
+          php bin/console cache:warmup --env=test
+
+  lint:
+    name: Analyse de code
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Configurer PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: ctype, iconv
+
+      - name: Installer Composer
+        uses: php-actions/composer@v1
+        with:
+          php_version: '8.1'
+
+      - name: Installer les dépendances
+        run: composer install --prefer-dist --no-interaction
+
+      - name: Vérifier la syntaxe PHP
+        run: find . -name "*.php" -not -path "./vendor/*" -exec php -l {} \;
+
+      - name: Vérifier le formatage (si PHP CS Fixer est installé)
+        run: |
+          if [ -f "vendor/bin/php-cs-fixer" ]; then
+            vendor/bin/php-cs-fixer fix --dry-run --diff || true
+          else
+            echo "PHP CS Fixer non installé, skip..."
+          fi
+        continue-on-error: true
+

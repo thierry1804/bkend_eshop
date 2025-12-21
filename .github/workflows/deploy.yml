@@ -16,7 +16,7 @@ jobs:
       - name: Checkout du code
         uses: actions/checkout@v4
 
-      - name: Configurer Git pour le workspace
+      - name: Allow git to use the workspace directory
         run: git config --global --add safe.directory /github/workspace
 
       - name: Créer le fichier .env pour le build

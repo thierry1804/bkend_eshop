@@ -1,0 +1,9 @@
+# Configuration Messenger pour les tests - transport synchrone (pas besoin de base de données)
+framework:
+    messenger:
+        transports:
+            async: 'sync://'
+
+        routing:
+            App\Message\SendContactMailMessage: async
+

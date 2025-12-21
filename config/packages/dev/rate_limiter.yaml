@@ -1,0 +1,11 @@
+# Configuration du rate limiter pour l'environnement de développement
+# Limite augmentée pour faciliter les tests
+framework:
+    rate_limiter:
+        contact_mail:
+            policy: 'token_bucket'
+            limit: 100
+            rate:
+                interval: '1 minute'
+                amount: 100
+

@@ -1,0 +1,9 @@
+framework:
+    rate_limiter:
+        contact_mail:
+            policy: 'token_bucket'
+            limit: 5
+            rate:
+                interval: '1 minute'
+                amount: 5
+

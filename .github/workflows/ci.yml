@@ -25,19 +25,14 @@ jobs:
       - name: Checkout du code
         uses: actions/checkout@v4
 
-      - name: Fix permissions for workspace
+      - name: Allow Git to use workspace with different ownership
         run: |
-          # Allow git directory ownership
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          
-          # Fix ownership and permissions for workspace
-          sudo chown -R "$(id -u):$(id -g)" "$GITHUB_WORKSPACE"
-          sudo chmod -R u+rw "$GITHUB_WORKSPACE"
-          
-          # Ensure vendor directory is writable
-          sudo mkdir -p "$GITHUB_WORKSPACE/vendor"
-          sudo chown -R "$(id -u):$(id -g)" "$GITHUB_WORKSPACE/vendor"
-          sudo chmod -R u+rw "$GITHUB_WORKSPACE/vendor"
+          git config --global --add safe.directory /github/workspace
+
+      - name: Fix permissions
+        run: |
+          sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+          sudo chmod -R u+w $GITHUB_WORKSPACE
 
       - name: Créer le fichier .env avec toutes les variables nécessaires
         run: |
@@ -104,19 +99,14 @@ jobs:
       - name: Checkout du code
         uses: actions/checkout@v4
 
-      - name: Fix permissions for workspace
+      - name: Allow Git to use workspace with different ownership
         run: |
-          # Allow git directory ownership
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          
-          # Fix ownership and permissions for workspace
-          sudo chown -R "$(id -u):$(id -g)" "$GITHUB_WORKSPACE"
-          sudo chmod -R u+rw "$GITHUB_WORKSPACE"
-          
-          # Ensure vendor directory is writable
-          sudo mkdir -p "$GITHUB_WORKSPACE/vendor"
-          sudo chown -R "$(id -u):$(id -g)" "$GITHUB_WORKSPACE/vendor"
-          sudo chmod -R u+rw "$GITHUB_WORKSPACE/vendor"
+          git config --global --add safe.directory /github/workspace
+
+      - name: Fix permissions
+        run: |
+          sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+          sudo chmod -R u+w $GITHUB_WORKSPACE
 
       - name: Créer le fichier .env pour CI
         run: |

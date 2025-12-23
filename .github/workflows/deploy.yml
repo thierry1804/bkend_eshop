@@ -51,9 +51,9 @@ jobs:
           APP_ENV: prod
           APP_DEBUG: 0
           APP_SECRET: build-secret-key-for-production
-          DATABASE_URL: sqlite:///:memory:
-          MESSENGER_TRANSPORT_DSN: doctrine://default
-          MAILER_DSN: null://null
+          DATABASE_URL: "sqlite:///:memory:"
+          MESSENGER_TRANSPORT_DSN: "doctrine://default"
+          MAILER_DSN: "null://null"
         run: |
           php bin/console cache:clear --env=prod --no-debug || true
           php bin/console cache:warmup --env=prod --no-debug || true

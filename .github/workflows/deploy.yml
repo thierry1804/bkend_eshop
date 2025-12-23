@@ -11,6 +11,7 @@ jobs:
   deploy:
     name: Déployer l'application
     runs-on: ubuntu-latest
+    environment: prod
     
     steps:
       - name: Checkout du code
@@ -96,7 +97,19 @@ jobs:
           # CORS_ALLOW_ORIGIN=
           EOF
 
+      - name: Vérifier la configuration FTP
+        id: check_ftp
+        run: |
+          if [ -z "${{ secrets.FTP_SERVER }}" ] || [ -z "${{ secrets.FTP_USERNAME }}" ] || [ -z "${{ secrets.FTP_PASSWORD }}" ]; then
+            echo "ftp_configured=false" >> $GITHUB_OUTPUT
+            echo "⚠️  Les secrets FTP ne sont pas configurés, le déploiement sera ignoré"
+          else
+            echo "ftp_configured=true" >> $GITHUB_OUTPUT
+            echo "✓ Configuration FTP détectée"
+          fi
+
       - name: Déployer via FTP
+        if: steps.check_ftp.outputs.ftp_configured == 'true'
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}

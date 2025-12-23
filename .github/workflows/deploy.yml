@@ -114,10 +114,14 @@ jobs:
             **/.gitignore
 
       - name: Appeler le script de post-déploiement automatique
-        if: ${{ secrets.POST_DEPLOY_WEBHOOK_URL != '' }}
         run: |
           TOKEN="${{ secrets.POST_DEPLOY_TOKEN }}"
           URL="${{ secrets.POST_DEPLOY_WEBHOOK_URL }}"
+          
+          if [ -z "$URL" ]; then
+            echo "⚠️  POST_DEPLOY_WEBHOOK_URL n'est pas configuré, étape ignorée"
+            exit 0
+          fi
           
           if [ -n "$TOKEN" ]; then
             curl -X GET "$URL?token=$TOKEN" || echo "⚠️  Impossible d'appeler le webhook (non bloquant)"

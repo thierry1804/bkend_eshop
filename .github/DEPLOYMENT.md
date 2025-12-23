@@ -56,6 +56,46 @@ Assurez-vous que :
 1. Le serveur FTP est accessible et fonctionnel
 2. Les permissions d'écriture sont configurées sur le répertoire de destination
 3. PHP et Composer sont installés sur le serveur (si vous devez exécuter des commandes)
+4. **Configuration du serveur web** : Le document root doit pointer vers le dossier `public` de l'application
+
+**Configuration du serveur web (Apache/Nginx)** :
+
+Pour avoir des URLs propres comme `https://api.eshopbyvalsue.mg/api/mail/contact` au lieu de `https://api.eshopbyvalsue.mg/public/index.php/api/mail/contact`, vous devez :
+
+**Pour Apache** :
+- Configurer le document root pour pointer vers le dossier `public` de votre application
+- Le fichier `.htaccess` est déjà inclus dans le déploiement et gère automatiquement la réécriture d'URL
+- Assurez-vous que le module `mod_rewrite` est activé sur votre serveur Apache
+
+**Pour Nginx** :
+```nginx
+server {
+    listen 80;
+    server_name api.eshopbyvalsue.mg;
+    root /chemin/vers/votre/application/public;
+
+    location / {
+        try_files $uri /index.php$is_args$args;
+    }
+
+    location ~ ^/index\.php(/|$) {
+        fastcgi_pass unix:/var/run/php/php8.1-fpm.sock;
+        fastcgi_split_path_info ^(.+\.php)(/.*)$;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        fastcgi_param DOCUMENT_ROOT $realpath_root;
+        internal;
+    }
+
+    location ~ \.php$ {
+        return 404;
+    }
+}
+```
+
+**Via cPanel/Plesk** :
+- Dans les paramètres du domaine, configurez le document root pour pointer vers le dossier `public` de votre application
+- Exemple : Si votre application est dans `/home/user/public_html/app`, le document root doit être `/home/user/public_html/app/public`
 
 #### Étape 3: Configuration automatique du fichier .env.local
 

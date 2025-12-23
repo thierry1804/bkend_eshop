@@ -1,0 +1,26 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Si la requête pointe directement vers public/, rediriger vers la racine (URLs propres)
+    RewriteCond %{THE_REQUEST} \s/public/([^\s?]*) [NC]
+    RewriteRule ^ /%1 [R=301,L]
+    
+    # Rediriger toutes les requêtes vers public/index.php
+    # Sauf si le fichier ou le répertoire existe déjà dans public/
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/index.php/$1 [L,QSA]
+</IfModule>
+
+# Protéger les fichiers sensibles
+<FilesMatch "^(\.env|\.git|composer\.(json|lock)|symfony\.lock)">
+    Require all denied
+</FilesMatch>
+
+# Empêcher l'accès direct aux répertoires sensibles
+RedirectMatch 403 ^/config/.*$
+RedirectMatch 403 ^/src/.*$
+RedirectMatch 403 ^/var/.*$
+RedirectMatch 403 ^/vendor/.*$
+

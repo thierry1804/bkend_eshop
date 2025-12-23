@@ -76,6 +76,11 @@ jobs:
           # L'action FTP-Deploy gérera les exclusions supplémentaires
           cp -r bin config public src templates vendor composer.json composer.lock symfony.lock deploy/ 2>/dev/null || true
           
+          # Copier le fichier .htaccess à la racine (si présent)
+          if [ -f ".htaccess" ]; then
+            cp .htaccess deploy/ 2>/dev/null || true
+          fi
+          
           # Copier le dossier scripts (contient post-deploy.sh)
           if [ -d "scripts" ]; then
             cp -r scripts deploy/ 2>/dev/null || true

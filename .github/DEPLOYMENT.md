@@ -56,16 +56,17 @@ Assurez-vous que :
 1. Le serveur FTP est accessible et fonctionnel
 2. Les permissions d'écriture sont configurées sur le répertoire de destination
 3. PHP et Composer sont installés sur le serveur (si vous devez exécuter des commandes)
-4. **Configuration du serveur web** : Le document root doit pointer vers le dossier `public` de l'application
+4. **Configuration du serveur web** : Le document root doit pointer vers la **racine** de l'application (pas vers `public`)
 
 **Configuration du serveur web (Apache/Nginx)** :
 
 Pour avoir des URLs propres comme `https://api.eshopbyvalsue.mg/api/mail/contact` au lieu de `https://api.eshopbyvalsue.mg/public/index.php/api/mail/contact`, vous devez :
 
 **Pour Apache** :
-- Configurer le document root pour pointer vers le dossier `public` de votre application
-- Le fichier `.htaccess` est déjà inclus dans le déploiement et gère automatiquement la réécriture d'URL
+- Configurer le document root pour pointer vers la **racine** de votre application (où se trouve le fichier `.htaccess`)
+- Le fichier `.htaccess` à la racine redirige automatiquement toutes les requêtes vers `public/index.php`
 - Assurez-vous que le module `mod_rewrite` est activé sur votre serveur Apache
+- Exemple : Si votre application est dans `/home/user/public_html/app`, le document root doit être `/home/user/public_html/app` (pas `/home/user/public_html/app/public`)
 
 **Pour Nginx** :
 ```nginx
@@ -94,8 +95,9 @@ server {
 ```
 
 **Via cPanel/Plesk** :
-- Dans les paramètres du domaine, configurez le document root pour pointer vers le dossier `public` de votre application
-- Exemple : Si votre application est dans `/home/user/public_html/app`, le document root doit être `/home/user/public_html/app/public`
+- Dans les paramètres du domaine, configurez le document root pour pointer vers la **racine** de votre application
+- Exemple : Si votre application est dans `/home/user/public_html/app`, le document root doit être `/home/user/public_html/app` (et non `/home/user/public_html/app/public`)
+- Le fichier `.htaccess` à la racine gérera automatiquement la redirection vers `public/index.php`
 
 #### Étape 3: Configuration automatique du fichier .env.local
 

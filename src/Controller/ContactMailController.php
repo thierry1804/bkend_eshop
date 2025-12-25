@@ -18,7 +18,7 @@ class ContactMailController extends AbstractController
         private RateLimiterFactory $contactMailLimiter
     ) {}
 
-    #[Route('/api/mail/contact', methods: ['POST'])]
+    #[Route('/api/mail/contact', methods: ['POST', 'GET'])]
     public function __invoke(
         Request $request,
         ValidatorInterface $validator,

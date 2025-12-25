@@ -41,6 +41,12 @@ jobs:
           extensions: ctype, iconv, pdo, pdo_mysql, pdo_sqlite
           coverage: none
 
+      - name: Ajouter symfony/debug-bundle
+        env:
+          COMPOSER_HOME: ${{ runner.temp }}/composer
+          COMPOSER_CACHE_DIR: ${{ runner.temp }}/composer-cache
+        run: composer require --dev symfony/debug-bundle --no-interaction --prefer-dist --no-progress
+
       - name: Installer les dépendances
         env:
           COMPOSER_HOME: ${{ runner.temp }}/composer

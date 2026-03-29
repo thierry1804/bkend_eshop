@@ -6,4 +6,10 @@ framework:
             rate:
                 interval: '1 minute'
                 amount: 5
+        image_upload:
+            policy: 'token_bucket'
+            limit: 30
+            rate:
+                interval: '1 minute'
+                amount: 30
 

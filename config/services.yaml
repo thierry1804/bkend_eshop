@@ -1,4 +1,8 @@
 parameters:
+    image_upload_dir: '%env(resolve:IMAGE_UPLOAD_DIR)%'
+    image_base_url: '%env(IMAGE_BASE_URL)%'
+    image_max_size: '%env(int:IMAGE_MAX_SIZE)%'
+    image_api_key: '%env(IMAGE_API_KEY)%'
 
 services:
     _defaults:
@@ -19,3 +23,14 @@ services:
     App\EventSubscriber\CorsSubscriber:
         arguments:
             $allowedOrigin: '%env(CORS_ALLOW_ORIGIN)%'
+
+    App\Service\ImageService:
+        arguments:
+            $uploadDir: '%image_upload_dir%'
+            $baseUrl: '%image_base_url%'
+            $maxSize: '%image_max_size%'
+
+    App\Controller\ImageController:
+        arguments:
+            $imageUploadLimiter: '@limiter.image_upload'
+            $apiKey: '%image_api_key%'

@@ -80,7 +80,7 @@ jobs:
           
           # Copier tous les fichiers nécessaires
           # L'action FTP-Deploy gérera les exclusions supplémentaires
-          cp -r bin config public src templates vendor composer.json composer.lock symfony.lock deploy/ 2>/dev/null || true
+          cp -r bin config public src templates composer.json composer.lock symfony.lock deploy/ 2>/dev/null || true
           
           # Copier le fichier .htaccess à la racine (si présent)
           if [ -f ".htaccess" ]; then
@@ -132,6 +132,40 @@ jobs:
               *) echo "server_dir=${DIR}/" >> "$GITHUB_OUTPUT" ;;
             esac
           fi
+          PROTO="${{ secrets.FTP_PROTOCOL || 'ftp' }}"
+          PORT="${{ secrets.FTP_PORT }}"
+          if [ -z "$PORT" ]; then
+            if [ "$PROTO" = "ftps-legacy" ]; then PORT=990; else PORT=21; fi
+          fi
+          echo "ftp_port=$PORT" >> "$GITHUB_OUTPUT"
+
+      - name: Vérifier la connectivité FTP
+        if: steps.check_ftp.outputs.ftp_configured == 'true'
+        run: |
+          set -e
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp
+          PROTO="${{ secrets.FTP_PROTOCOL || 'ftp' }}"
+          PORT="${{ steps.ftp_paths.outputs.ftp_port }}"
+          SERVER="${{ secrets.FTP_SERVER }}"
+          USER="${{ secrets.FTP_USERNAME }}"
+          PASS="${{ secrets.FTP_PASSWORD }}"
+          if [ "$PROTO" = "sftp" ]; then
+            echo "::error::FTP-Deploy-Action ne prend en charge que ftp, ftps et ftps-legacy (pas SFTP). Définissez FTP_PROTOCOL sur ftp ou ftps, ou remplacez l'étape par SCP/rsync (ex. appleboy/scp-action)."
+            exit 1
+          fi
+          echo "Test ${PROTO} sur ${SERVER}:${PORT}…"
+          case "$PROTO" in
+            ftps)
+              lftp -u "$USER","$PASS" -e "set net:timeout 20; set net:max-retries 2; set ftp:ssl-force true; set ssl:verify-certificate no; ls; bye" -p "$PORT" "ftp://$SERVER"
+              ;;
+            ftps-legacy)
+              lftp -u "$USER","$PASS" -e "set net:timeout 20; set net:max-retries 2; set ssl:verify-certificate no; ls; bye" -p "$PORT" "ftps://$SERVER"
+              ;;
+            *)
+              lftp -u "$USER","$PASS" -e "set net:timeout 20; set net:max-retries 2; ls; bye" -p "$PORT" "ftp://$SERVER"
+              ;;
+          esac
 
       - name: Déployer via FTP
         if: steps.check_ftp.outputs.ftp_configured == 'true'
@@ -140,13 +174,14 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          port: ${{ secrets.FTP_PORT || 21 }}
+          port: ${{ steps.ftp_paths.outputs.ftp_port }}
           protocol: ${{ secrets.FTP_PROTOCOL || 'ftp' }}
           local-dir: ./deploy/
           server-dir: ${{ steps.ftp_paths.outputs.server_dir }}
           dangerous-clean-slate: false
-          timeout: 300000
+          timeout: 600000
           exclude: |
+            **/vendor/**
             **/.git*
             **/.git*/**
             **/.github/**

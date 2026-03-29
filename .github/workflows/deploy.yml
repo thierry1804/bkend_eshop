@@ -119,9 +119,23 @@ jobs:
             echo "✓ Configuration FTP détectée"
           fi
 
+      - name: Préparer les chemins FTP
+        id: ftp_paths
+        if: steps.check_ftp.outputs.ftp_configured == 'true'
+        run: |
+          DIR="${{ secrets.FTP_SERVER_DIR }}"
+          if [ -z "$DIR" ] || [ "$DIR" = "/" ]; then
+            echo "server_dir=/" >> "$GITHUB_OUTPUT"
+          else
+            case "$DIR" in
+              */) echo "server_dir=$DIR" >> "$GITHUB_OUTPUT" ;;
+              *) echo "server_dir=${DIR}/" >> "$GITHUB_OUTPUT" ;;
+            esac
+          fi
+
       - name: Déployer via FTP
         if: steps.check_ftp.outputs.ftp_configured == 'true'
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
@@ -129,8 +143,9 @@ jobs:
           port: ${{ secrets.FTP_PORT || 21 }}
           protocol: ${{ secrets.FTP_PROTOCOL || 'ftp' }}
           local-dir: ./deploy/
-          server-dir: ${{ secrets.FTP_SERVER_DIR || '/' }}
+          server-dir: ${{ steps.ftp_paths.outputs.server_dir }}
           dangerous-clean-slate: false
+          timeout: 300000
           exclude: |
             **/.git*
             **/.git*/**

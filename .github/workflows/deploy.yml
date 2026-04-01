@@ -79,7 +79,7 @@ jobs:
           mkdir -p deploy
           
           # Copier le code (sans vendor : trop de fichiers → timeouts / erreurs 4xx sur le FTP)
-          cp -r bin config migrations public src templates composer.json composer.lock symfony.lock deploy/ 2>/dev/null || true
+          cp -r bin config public src templates composer.json composer.lock symfony.lock deploy/ 2>/dev/null || true
           
           # Une seule archive : upload fiable ; extraction sur le serveur via scripts/post-deploy.sh
           echo "Création de vendor.tar.gz…"
@@ -208,7 +208,7 @@ jobs:
         if: success() && steps.check_ftp.outputs.ftp_configured == 'true'
         run: |
           echo "::notice::Après FTP : sur le serveur (SSH), à la racine Symfony, lancer : bash scripts/post-deploy.sh"
-          echo "::notice::(extrait vendor.tar.gz, migrations, cache, etc.) ou au minimum : tar -xzf vendor.tar.gz && rm -f vendor.tar.gz"
+          echo "::notice::(extrait vendor.tar.gz, schéma DB, cache, etc.) ou au minimum : tar -xzf vendor.tar.gz && rm -f vendor.tar.gz"
 
       - name: Appeler le script de post-déploiement automatique
         run: |

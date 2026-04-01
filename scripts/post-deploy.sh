@@ -58,14 +58,9 @@ echo "🗄️  Mise à jour de la base de données..."
 export APP_ENV=prod
 export APP_DEBUG=0
 
-# Migrations (si disponibles)
-if php bin/console doctrine:migrations:status --no-interaction 2>/dev/null; then
-    echo "  → Exécution des migrations..."
-    php bin/console doctrine:migrations:migrate --no-interaction --env=prod || true
-else
-    echo "  → Mise à jour du schéma..."
-    php bin/console doctrine:schema:update --force --no-interaction --env=prod || true
-fi
+# Schéma DB aligné sur les entités (pas de Doctrine Migrations sur cet hébergement)
+echo "  → Mise à jour du schéma Doctrine…"
+php bin/console doctrine:schema:update --force --no-interaction --env=prod || true
 
 # Vider et réchauffer le cache
 echo "🗑️  Nettoyage du cache..."

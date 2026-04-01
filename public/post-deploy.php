@@ -80,8 +80,14 @@ if (!file_exists($envLocalPath)) {
     }
 }
 
-// 3. Installer les dépendances si nécessaire
-if (file_exists("$appDir/composer.json") && !is_dir("$appDir/vendor")) {
+// 3. Dépendances : archive CI (vendor.tar.gz) ou Composer
+if (file_exists("$appDir/vendor.tar.gz")) {
+    $output[] = "📦 Extraction de vendor.tar.gz…";
+    if (is_dir("$appDir/vendor")) {
+        runCommand("cd $appDir && rm -rf vendor", $output, $errors);
+    }
+    runCommand("cd $appDir && tar -xzf vendor.tar.gz && rm -f vendor.tar.gz", $output, $errors);
+} elseif (file_exists("$appDir/composer.json") && !is_dir("$appDir/vendor")) {
     $output[] = "📦 Installation des dépendances Composer...";
     runCommand("cd $appDir && composer install --no-dev --optimize-autoloader --no-interaction", $output, $errors);
 }
@@ -102,8 +108,7 @@ $output[] = "🗄️  Mise à jour de la base de données...";
 putenv("APP_ENV=prod");
 putenv("APP_DEBUG=0");
 
-// Migrations (si disponibles)
-runCommand("cd $appDir && php bin/console doctrine:migrations:migrate --no-interaction --env=prod 2>&1 || php bin/console doctrine:schema:update --force --no-interaction --env=prod 2>&1", $output, $errors);
+runCommand("cd $appDir && php bin/console doctrine:schema:update --force --no-interaction --env=prod", $output, $errors);
 
 // 6. Vider et réchauffer le cache
 $output[] = "🗑️  Nettoyage du cache...";

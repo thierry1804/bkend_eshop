@@ -39,9 +39,15 @@ fi
 # Dépendances : archive produite par GitHub Actions (voir .github/workflows/deploy.yml)
 if [ -f "vendor.tar.gz" ]; then
     echo "📦 Extraction de vendor.tar.gz (déploiement CI)…"
-    rm -rf vendor
-    tar -xzf vendor.tar.gz
-    rm -f vendor.tar.gz
+    # Extraire dans un dossier temporaire (même FS → mv atomique, pas de fenêtre sans vendor)
+    rm -rf vendor_new
+    mkdir vendor_new
+    tar -xzf vendor.tar.gz -C vendor_new --strip-components=1
+    rm -rf vendor_old
+    [ -d "vendor" ] && mv vendor vendor_old
+    mv vendor_new vendor
+    rm -rf vendor_old vendor.tar.gz
+    echo "✓ vendor extrait et remplacé atomiquement."
 elif [ -f "composer.json" ] && [ ! -d "vendor" ]; then
     echo "📦 Installation des dépendances Composer (pas d'archive vendor.tar.gz)…"
     composer install --no-dev --optimize-autoloader --no-interaction

@@ -41,12 +41,6 @@ jobs:
           extensions: ctype, iconv, pdo, pdo_mysql, pdo_sqlite
           coverage: none
 
-      - name: Ajouter symfony/debug-bundle
-        env:
-          COMPOSER_HOME: ${{ runner.temp }}/composer
-          COMPOSER_CACHE_DIR: ${{ runner.temp }}/composer-cache
-        run: composer require --dev symfony/debug-bundle --no-interaction --prefer-dist --no-progress
-
       - name: Installer les dépendances
         env:
           COMPOSER_HOME: ${{ runner.temp }}/composer
@@ -214,16 +208,24 @@ jobs:
         run: |
           TOKEN="${{ secrets.POST_DEPLOY_TOKEN }}"
           URL="${{ secrets.POST_DEPLOY_WEBHOOK_URL }}"
-          
+
           if [ -z "$URL" ]; then
-            echo "⚠️  POST_DEPLOY_WEBHOOK_URL n'est pas configuré, étape ignorée"
+            echo "::warning::POST_DEPLOY_WEBHOOK_URL n'est pas configuré — extraire vendor manuellement via : bash scripts/post-deploy.sh"
             exit 0
           fi
-          
+
           if [ -n "$TOKEN" ]; then
-            curl -X GET "$URL?token=$TOKEN" || echo "⚠️  Impossible d'appeler le webhook (non bloquant)"
+            HTTP_CODE=$(curl -s -o /tmp/webhook_response.txt -w "%{http_code}" -X GET "$URL?token=$TOKEN")
           else
-            curl -X GET "$URL" || echo "⚠️  Impossible d'appeler le webhook (non bloquant)"
+            HTTP_CODE=$(curl -s -o /tmp/webhook_response.txt -w "%{http_code}" -X GET "$URL")
+          fi
+
+          echo "HTTP $HTTP_CODE"
+          cat /tmp/webhook_response.txt || true
+
+          if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
+            echo "::error::Le webhook post-deploy a répondu HTTP $HTTP_CODE — vendor peut ne pas être extrait sur le serveur !"
+            exit 1
           fi
         continue-on-error: true
 

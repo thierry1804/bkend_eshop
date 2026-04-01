@@ -80,7 +80,7 @@ jobs:
           
           # Copier tous les fichiers nécessaires
           # L'action FTP-Deploy gérera les exclusions supplémentaires
-          cp -r bin config public src templates composer.json composer.lock symfony.lock deploy/ 2>/dev/null || true
+          cp -r bin config migrations public src templates vendor composer.json composer.lock symfony.lock deploy/ 2>/dev/null || true
           
           # Copier le fichier .htaccess à la racine (si présent)
           if [ -f ".htaccess" ]; then
@@ -186,7 +186,6 @@ jobs:
           dangerous-clean-slate: false
           timeout: 600000
           exclude: |
-            **/vendor/**
             **/.git*
             **/.git*/**
             **/.github/**

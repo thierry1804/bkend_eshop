@@ -36,9 +36,14 @@ else
     fi
 fi
 
-# Installer les dépendances si nécessaire
-if [ -f "composer.json" ] && [ ! -d "vendor" ]; then
-    echo "📦 Installation des dépendances Composer..."
+# Dépendances : archive produite par GitHub Actions (voir .github/workflows/deploy.yml)
+if [ -f "vendor.tar.gz" ]; then
+    echo "📦 Extraction de vendor.tar.gz (déploiement CI)…"
+    rm -rf vendor
+    tar -xzf vendor.tar.gz
+    rm -f vendor.tar.gz
+elif [ -f "composer.json" ] && [ ! -d "vendor" ]; then
+    echo "📦 Installation des dépendances Composer (pas d'archive vendor.tar.gz)…"
     composer install --no-dev --optimize-autoloader --no-interaction
 fi
 

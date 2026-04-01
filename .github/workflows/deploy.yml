@@ -92,19 +92,8 @@ jobs:
           
           # Créer les répertoires nécessaires
           mkdir -p deploy/var/cache deploy/var/log
-          
-          # Créer un fichier .env.local avec les valeurs de base
-          # Les secrets doivent être ajoutés manuellement sur le serveur
-          cat > deploy/.env.local << 'EOF'
-          APP_ENV=prod
-          APP_DEBUG=0
-          # Les variables suivantes doivent être configurées manuellement :
-          # APP_SECRET=
-          # MAILER_DSN=
-          # MESSENGER_TRANSPORT_DSN=doctrine://default
-          # DATABASE_URL=
-          # CORS_ALLOW_ORIGIN=
-          EOF
+          # .env.local N'EST PAS déployé par CI : il contient les secrets prod
+          # et doit être configuré une seule fois manuellement sur le serveur.
 
       - name: Vérifier la configuration FTP
         id: check_ftp
@@ -189,6 +178,7 @@ jobs:
             **/.git*/**
             **/.github/**
             **/.env
+            **/.env.local
             **/.env.dev
             **/.env.test
             **/.env.prod

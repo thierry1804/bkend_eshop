@@ -10,5 +10,13 @@
 /public/bundles/
 /var/
 /vendor/
+### JWT keys (générés localement) ###
+/config/jwt/*.pem
+
 ###< symfony/framework-bundle ###
 
+
+###> phpunit/phpunit ###
+/phpunit.xml
+/.phpunit.cache/
+###< phpunit/phpunit ###
